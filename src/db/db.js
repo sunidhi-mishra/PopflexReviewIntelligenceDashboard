@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-const dbPath = path.resolve(__dirname, '../../popflex_reviews.db');
+const dbPath = path.resolve(process.cwd(), 'popflex_reviews.db');
 
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {

@@ -173,5 +173,8 @@ function mockAnalyzeReview(text = '', rating) {
 }
 
 module.exports = {
-    analyzeReview
+    analyzeReview,
+    getGroqClient,
+    callWithRetry,
+    apiKeys
 };

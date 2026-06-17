@@ -44,6 +44,16 @@ async function initializeDatabase() {
         `);
         console.log('- Review Themes table initialized.');
 
+        // 3a. Create Review Embeddings table
+        await db.run(`
+            CREATE TABLE IF NOT EXISTS review_embeddings (
+                review_id TEXT PRIMARY KEY,
+                embedding TEXT NOT NULL,
+                FOREIGN KEY(review_id) REFERENCES reviews(review_id)
+            )
+        `);
+        console.log('- Review Embeddings table initialized.');
+
         // 4. Create Monthly Analytics table
         await db.run(`
             CREATE TABLE IF NOT EXISTS monthly_analytics (
