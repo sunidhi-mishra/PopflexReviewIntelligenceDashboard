@@ -1,0 +1,42 @@
+name: Monthly Reviews Ingestion & AI Analysis
+
+on:
+  schedule:
+    - cron: '0 0 1 * *' # Runs on the 1st of every month at midnight UTC
+  workflow_dispatch: # Allows manual trigger from the Actions tab
+
+jobs:
+  sync-and-analyze:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # Required to push database changes back to the repository
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci || npm install
+
+      - name: Initialize Database
+        run: node src/db/init.js
+
+      - name: Run Reviews Sync & AI Processing
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: node src/cron/monthlySync.js
+
+      - name: Commit & Push SQLite Database Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add popflex_reviews.db
+          # Only commit and push if the database file was created or updated
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: automated monthly reviews ingestion and AI analysis [skip ci]" && git push)
