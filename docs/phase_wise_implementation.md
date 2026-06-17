@@ -1,6 +1,6 @@
 # POPFLEX Review Intelligence Platform: Phase-Wise Implementation Plan
 
-This document outlines the step-by-step implementation plan for building and deploying the **POPFLEX Review Intelligence Platform**. The platform is structured to ingest DTC Shopify reviews on a monthly cadence, process them using the Groq API, run lifecycle analysis, auto-export data to Google Docs, send monthly email overviews via a custom Railway-hosted MCP server, and offer a conversational RAG chatbot for deeper analysis.
+This document outlines the step-by-step implementation plan for building and deploying the **POPFLEX Review Intelligence Platform**. The platform is structured to ingest DTC Shopify reviews on a monthly cadence, process them using the Groq API, run lifecycle analysis, auto-export data to Google Docs, send monthly email overviews via a custom Vercel-hosted MCP server, and offer a conversational RAG chatbot for deeper analysis.
 
 ```
 +-----------------------------------------------------------------------------------+
@@ -64,13 +64,13 @@ This document outlines the step-by-step implementation plan for building and dep
 
 ---
 
-## Phase 3: Railway MCP Server Integration & Export Automation (Weeks 5-6)
-**Goal:** Integrate the existing custom Model Context Protocol (MCP) server hosted on Railway to automate Google Docs exports and monthly email reporting.
+## Phase 3: Vercel MCP Server Integration & Export Automation (Weeks 5-6)
+**Goal:** Integrate the existing custom Model Context Protocol (MCP) server hosted on Vercel to automate Google Docs exports and monthly email reporting.
 
 ### Key Activities
 1. **MCP Server Integration:**
-   * Connect the application backend to the deployed **Railway-hosted MCP Server**.
-   * Configure authentication credentials (OAuth / API tokens) for Gmail and Google Docs inside the Railway environment.
+   * Connect the application backend to the deployed **Vercel-hosted MCP Server**.
+   * Configure authentication credentials (OAuth / API tokens) for Gmail and Google Docs inside the Vercel environment.
 2. **Google Docs Auto-Export Module:**
    * Write helper functions to serialize monthly dashboard stats, catalog health indexes, and AI recommendations.
    * Program the backend to push these reports to a target Google Doc via the MCP server's Document API immediately after the monthly sync.
@@ -81,7 +81,7 @@ This document outlines the step-by-step implementation plan for building and dep
    * Connect the end of the Phase 1 & 2 sync pipeline to fire the MCP export and email scripts sequentially.
 
 ### Key Deliverables
-* Operational connection between app backend and Railway MCP server.
+* Operational connection between app backend and Vercel MCP server.
 * Automate script triggers for Google Docs appending.
 * Successful simulated email delivery of monthly summary reports.
 
@@ -142,7 +142,7 @@ This document outlines the step-by-step implementation plan for building and dep
                                   |                                |
                                   v                                v
 +-------------------+       +-------------------+       +--------------------+
-|  Railway MCP      | <==== |   App Backend     | <---> |   Groq API         |
+|  Vercel MCP       | <==== |   App Backend     | <---> |   Groq API         |
 |  (Gmail & GDocs)  |       |  (Express/Python) |       |  (NLP & RAG Chat)  |
 +-------------------+       +-------------------+       +--------------------+
                                   |
@@ -161,6 +161,6 @@ This document outlines the step-by-step implementation plan for building and dep
 | :--- | :--- | :--- |
 | **Phase 1** | Ingestion & Cron Live | Successful manual run of monthly sync importing historical review batches. |
 | **Phase 2** | Groq NLP Pipeline | Classification pipeline completes in <2 minutes; accuracy hits >=90% target. |
-| **Phase 3** | MCP Automation Live | Verified document updates in Google Docs and automated Gmail receipt via Railway MCP. |
+| **Phase 3** | MCP Automation Live | Verified document updates in Google Docs and automated Gmail receipt via Vercel MCP. |
 | **Phase 4** | Dashboard & Chat Ready | Chatbot responds correctly in <3s with accurate source review citations. |
 | **Phase 5** | Production Rollout | End-to-end cron -> Groq -> MCP pipeline passes 100% of integration test cases. |

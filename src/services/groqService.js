@@ -1,21 +1,71 @@
 require('dotenv').config();
 const { Groq } = require('groq-sdk');
 
-// Ensure Groq client is initialized with API key
-let groqInstance = null;
-try {
-    if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY !== 'your_groq_api_key_here') {
-        groqInstance = new Groq({ apiKey: process.env.GROQ_API_KEY });
+// Support comma-separated list of keys for API key rotation
+const apiKeys = (process.env.GROQ_API_KEY || '')
+    .split(',')
+    .map(key => key.trim())
+    .filter(key => key && key !== 'your_groq_api_key_here');
+
+let currentKeyIndex = 0;
+
+function getGroqClient() {
+    if (apiKeys.length === 0) {
+        return null;
     }
-} catch (e) {
-    console.warn('[GroqService] Warning: Could not initialize Groq SDK:', e.message);
+    const key = apiKeys[currentKeyIndex];
+    return new Groq({ apiKey: key });
+}
+
+function rotateApiKey() {
+    if (apiKeys.length <= 1) {
+        return false;
+    }
+    currentKeyIndex = (currentKeyIndex + 1) % apiKeys.length;
+    console.log(`[GroqService] Rotated to API key index ${currentKeyIndex}`);
+    return true;
+}
+
+/**
+ * Robust retry wrapper with exponential backoff and jitter for API requests
+ */
+async function callWithRetry(apiCallFn, maxRetries = 5, baseDelay = 1000) {
+    let attempts = 0;
+    while (attempts < maxRetries) {
+        try {
+            return await apiCallFn();
+        } catch (error) {
+            attempts++;
+            const isRateLimit = error.status === 429 || 
+                                error.message?.includes('429') || 
+                                error.message?.toLowerCase().includes('rate limit');
+            
+            console.warn(`[GroqService] Attempt ${attempts} failed: ${error.message}`);
+            
+            if (attempts >= maxRetries) {
+                throw error;
+            }
+
+            if (isRateLimit) {
+                if (rotateApiKey()) {
+                    console.log(`[GroqService] Rate limit hit. Rotated to next API key. Retrying immediately...`);
+                    continue;
+                }
+            }
+
+            const delay = baseDelay * Math.pow(2, attempts) * (0.5 + Math.random());
+            console.log(`[GroqService] Retrying in ${Math.round(delay)}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+    }
 }
 
 /**
  * Perform AI sentiment analysis and theme classification using Groq Llama 3 LLM
  */
 async function analyzeReview(reviewText, rating) {
-    if (!groqInstance) {
+    const hasKeys = apiKeys.length > 0;
+    if (!hasKeys) {
         // Fallback mock classification for local testing/development if key is not configured
         console.warn('[GroqService] Groq API Key is not configured. Falling back to rule-based classification.');
         return mockAnalyzeReview(reviewText, rating);
@@ -45,20 +95,26 @@ Return ONLY a JSON object with this exact structure:
 `;
 
     try {
-        const chatCompletion = await groqInstance.chat.completions.create({
-            messages: [
-                {
-                    role: 'system',
-                    content: 'You are a precise data analysis agent that outputs data strictly in JSON format.'
-                },
-                {
-                    role: 'user',
-                    content: prompt
-                }
-            ],
-            model: 'llama-3.1-8b-instant',
-            response_format: { type: 'json_object' },
-            temperature: 0.1
+        const chatCompletion = await callWithRetry(async () => {
+            const client = getGroqClient();
+            if (!client) {
+                throw new Error('No Groq API key configured');
+            }
+            return await client.chat.completions.create({
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'You are a precise data analysis agent that outputs data strictly in JSON format.'
+                    },
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                model: 'llama-3.1-8b-instant',
+                response_format: { type: 'json_object' },
+                temperature: 0.1
+            });
         });
 
         const rawResponse = chatCompletion.choices[0].message.content;
@@ -71,7 +127,7 @@ Return ONLY a JSON object with this exact structure:
             themes: Array.isArray(result.themes) ? result.themes : []
         };
     } catch (error) {
-        console.error('[GroqService] Error during Groq API call:', error.message);
+        console.error('[GroqService] Error during Groq API call after retries:', error.message);
         // Fallback to rule-based analysis on failure
         return mockAnalyzeReview(reviewText, rating);
     }

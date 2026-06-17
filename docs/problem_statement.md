@@ -9,7 +9,7 @@ To support this product goal, the platform will implement:
 1. **Monthly Data Syncing:** Automatically ingest Shopify reviews on a monthly cadence to track long-term performance shifts.
 2. **Groq API Backend:** Utilize Groq API's high-speed LLM engine for lightning-fast review analysis and processing.
 3. **RAG Chatbot Assistant:** Provide a Retrieval-Augmented Generation (RAG) chatbot allowing users to ask questions about dashboard data and reviews.
-4. **Custom Railway-hosted MCP Server:** Integrate a Model Context Protocol (MCP) server to handle external service automation.
+4. **Custom Vercel-hosted MCP Server:** Integrate a Model Context Protocol (MCP) server to handle external service automation.
 5. **Google Docs Export:** Automatically export dashboard analytics and reports directly to Google Docs.
 6. **Monthly Email Overview:** Draft and dispatch a monthly overview report to a configurable target email address.
 
@@ -42,7 +42,7 @@ flowchart TD
     subgraph Core ["AI & Processing Engine"]
         B1["NLP Theme & Sentiment Engine<br>(Groq API)"]
         B2["RAG Vector Core<br>(Groq API Backend)"]
-        B3["Custom MCP Server (Railway)<br>(Integration Controller)"]
+        B3["Custom MCP Server (Vercel)<br>(Integration Controller)"]
     end
 
     subgraph Data ["Intelligence Storage"]
@@ -112,12 +112,12 @@ A conversational, Retrieval-Augmented Generation (RAG) assistant powered by the 
 ### E. Automated Monthly Email Overview
 A cron-scheduled reporting module that runs following the monthly data sync:
 * **Automated Drafting:** Compiles the latest monthly dashboard stats, catalog health scores, and critical product alerts into a clean overview report.
-* **Gmail Delivery:** Sends the report to the dashboard-specified email address using the custom **Railway-hosted MCP Server**.
+* **Gmail Delivery:** Sends the report to the dashboard-specified email address using the custom **Vercel-hosted MCP Server**.
 
 ### F. Google Docs Export Integration
 An export utility that automates data persistence in collaborative spaces:
 * **Auto-Exporting:** Writes and formats monthly dashboard metrics, trend summaries, and AI recommendations to a target Google Doc.
-* **Google Docs API Bridge:** Uses the custom **Railway-hosted MCP Server** to manage document generation and appending logic.
+* **Google Docs API Bridge:** Uses the custom **Vercel-hosted MCP Server** to manage document generation and appending logic.
 
 ---
 

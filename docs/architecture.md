@@ -20,7 +20,7 @@ The POPFLEX Review Intelligence Platform is designed to ingest raw Shopify custo
                                     |                          |
                                     v                          v
 +------------------+      +-------------------+      +-------------------+
-|  Railway MCP     |      |  PostgreSQL DB &  |      |   Vector Search   |
+|  Vercel MCP      |      |  PostgreSQL DB &  |      |   Vector Search   |
 | (Gmail & GDocs)  | <====|  Vector Storage   |      |  (e.g. pgvector)  |
 +------------------+      +-------------------+      +-------------------+
 ```
@@ -47,9 +47,9 @@ The platform comprises five primary architectural components:
 * **Lifecycle Alerts:** Monitors month-over-month sentiment shifts and flags declining products.
 * **Reporting Trigger:** Executes downstream exports to Google Docs and Gmail upon completing processing.
 
-### D. Model Context Protocol (MCP) Server (Railway)
+### D. Model Context Protocol (MCP) Server (Vercel)
 * **Role:** Acts as an execution gateway to interact with Google Workspace APIs.
-* **Hosted Platform:** Deployed on Railway.
+* **Hosted Platform:** Deployed on Vercel.
 * **Available Tool Schemas:**
   * `write_to_google_doc(document_id, title, content_markdown)`: Appends monthly dashboard health report summaries and leaderboard shifts to the collaborative log document.
   * `send_email_report(recipient_email, subject, body_html)`: Composes and dispatches the styled monthly overview email report.
@@ -72,7 +72,7 @@ sequenceDiagram
     participant Ingest as Ingestion Worker
     participant DB as Relational Database
     participant Groq as Groq LLM API
-    participant MCP as Railway MCP Server
+    participant MCP as Vercel MCP Server
     
     Ingest->>Shopify: Fetch reviews for cohort month
     Shopify-->>Ingest: Return JSON review records
@@ -157,14 +157,14 @@ The relational database (PostgreSQL) maintains transactional, processed, and set
 | **Primary Database** | PostgreSQL | Robust JSON validation capabilities, acid compliance, and SQL metrics math. |
 | **Vector Search Extension** | `pgvector` | Keeps relational product data and text embeddings inside a single Postgres instance. |
 | **AI LLM Inference** | Groq API (Llama-3-8B/70B) | High token-throughput and minimal inference latency ($<3$ seconds RAG replies). |
-| **Integration Gateway** | Model Context Protocol (MCP) | Clean encapsulation of Gmail and Google Docs tool execution; decoupled deployment on Railway. |
+| **Integration Gateway** | Model Context Protocol (MCP) | Clean encapsulation of Gmail and Google Docs tool execution; decoupled deployment on Vercel. |
 
 ---
 
 ## 6. Security, Authentication & Configuration
 
 1. **API Keys & Secrets:**
-   * Groq API keys and Google Workspace service account certificates are stored as encrypted environment variables in the Railway environment and the app hosting environment.
+   * Groq API keys and Google Workspace service account certificates are stored as encrypted environment variables in the Vercel environment and the app hosting environment.
 2. **Access Control:**
    * Next.js admin dashboard requires authentication (e.g., Auth0 or NextAuth) to configure report email targets or manually trigger integrations.
 3. **Rate Limiting & Retries:**
