@@ -1,4 +1,4 @@
-# ReviewIQ — AI Product Health Monitor ✨
+# POPFLEX Review Intelligence Platform ✨
 
 > A full-stack AI platform that ingests live POPFLEX reviews, classifies them across 6 quality dimensions, and surfaces a Product Health Index leaderboard with a RAG-powered chatbot 🤖
 
