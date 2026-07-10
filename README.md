@@ -156,8 +156,3 @@ This project was built as a product management portfolio artifact to show:
 
 ---
 
-## Author 👩‍💻
-
-**Sunidhi Mishra**
-Product Management Portfolio — 2026
-[LinkedIn](https://linkedin.com/in/your-profile) · [Notion Portfolio](https://your-notion-link)
