@@ -154,5 +154,5 @@ This project was built as a product management portfolio artifact to show:
 | POPFLEX website | 14 | Per-product fit issues, stitching defects, sizing complaints |
 | Judge.me CDN (live) | Limited demo corpus | Cross-SKU health distribution |
 
----
+
 
